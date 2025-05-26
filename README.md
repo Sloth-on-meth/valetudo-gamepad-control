@@ -2,9 +2,9 @@
 
 
 
-  <img src="https://img.shields.io/github/last-commit/sloth-on-meth/valetudo-ps4-controller?color=yellow" alt="Last Commit">
-  <img src="https://img.shields.io/github/stars/sloth-on-meth/valetudo-ps4-controller?style=social" alt="Stars">
-  <img src="https://img.shields.io/github/issues/sloth-on-meth/valetudo-ps4-controller" alt="Issues">
+  <img src="https://img.shields.io/github/last-commit/sloth-on-meth/valetudo-gamepad-control?color=yellow" alt="Last Commit">
+  <img src="https://img.shields.io/github/stars/sloth-on-meth/valetudo-gamepad-control?style=social" alt="Stars">
+  <img src="https://img.shields.io/github/issues/sloth-on-meth/valetudo-gamepad-control" alt="Issues">
 
 
 
