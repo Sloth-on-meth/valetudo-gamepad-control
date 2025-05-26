@@ -10,16 +10,20 @@ VALE_URL = "http://192.168.178.43"
 CONTROL_ENDPOINT = "/api/v2/robot/capabilities/HighResolutionManualControlCapability"
 FAN_ENDPOINT = "/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
 DEADZONE = 0.15
-MAX_SPEED = 0.6
+NORMAL_SPEED = 0.6
+BOOST_SPEED = 1.0
 ANGLE_EPSILON = 3
 VELOCITY_EPSILON = 0.02
 SEND_INTERVAL = 0.1
 
-X_BUTTON_INDEX = 0  # PS4 "X" button
+X_BUTTON_INDEX = 0      # PS4 "X" button = toggle fan
+BOOST_BUTTON_INDEX = 1  # PS4 "Circle" button = toggle boost
 
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0.0
 fan_state = "off"
+boost_enabled = False
+boost_toggle_state = False
 
 session = requests.Session()
 retries = Retry(total=3, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
@@ -32,7 +36,7 @@ def send_command(action, velocity=0.0, angle=0.0):
 
     if action == "move":
         angle = round(angle, 1)
-        velocity = round(velocity, 3)
+        velocity = round(min(1.0, velocity), 3)  # Clamp max velocity
 
         angle_changed = last_sent["angle"] is None or abs(angle - last_sent["angle"]) > ANGLE_EPSILON
         velocity_changed = last_sent["velocity"] is None or abs(velocity - last_sent["velocity"]) > VELOCITY_EPSILON
@@ -80,6 +84,8 @@ def toggle_fan():
 
 
 def main():
+    global boost_enabled, boost_toggle_state
+
     pygame.init()
     pygame.joystick.init()
 
@@ -100,15 +106,33 @@ def main():
         while True:
             pygame.event.pump()
 
+            # Debug: print any button press
+            for i in range(js.get_numbuttons()):
+                if js.get_button(i):
+                    print(f"Button {i} pressed")
+
             x_axis = js.get_axis(0)
-            y_axis = -js.get_axis(1)
+            y_axis = -js.get_axis(1)  # Forward = positive
 
             x_button = js.get_button(X_BUTTON_INDEX)
+            boost_button = js.get_button(BOOST_BUTTON_INDEX)
+
+            # Fan toggle (X)
             if x_button and not fan_button_state:
                 toggle_fan()
                 fan_button_state = True
             elif not x_button:
                 fan_button_state = False
+
+            # Boost toggle (Circle)
+            if boost_button and not boost_toggle_state:
+                boost_enabled = not boost_enabled
+                print(f"[i] Boost {'enabled' if boost_enabled else 'disabled'}")
+                boost_toggle_state = True
+            elif not boost_button:
+                boost_toggle_state = False
+
+            max_speed = BOOST_SPEED if boost_enabled else NORMAL_SPEED
 
             abs_x = abs(x_axis)
             abs_y = abs(y_axis)
@@ -116,27 +140,24 @@ def main():
             if abs_x < DEADZONE and abs_y < DEADZONE:
                 send_command("move", velocity=0.0, angle=0.0)
 
-            elif abs_y > DEADZONE and abs_x < DEADZONE:
-                # Straight forward or backward
+            elif abs_y > DEADZONE and abs_x < (DEADZONE * 1.5):
                 angle_deg = 0 if y_axis > 0 else 180
                 norm_mag = (abs(y_axis) - DEADZONE) / (1 - DEADZONE)
-                velocity = norm_mag * MAX_SPEED
+                velocity = norm_mag * max_speed
                 if y_axis < 0:
                     velocity = -velocity
                 send_command("move", velocity=velocity, angle=angle_deg)
 
-            elif abs_x > DEADZONE and abs_y < DEADZONE:
-                # Spin in place
+            elif abs_x > DEADZONE and abs_y < (DEADZONE * 1.5):
                 angle_deg = 90 if x_axis > 0 else -90
                 send_command("move", velocity=0.0, angle=angle_deg)
 
             else:
-                # Arc/curve
                 angle_rad = math.atan2(x_axis, y_axis)
                 angle_deg = math.degrees(angle_rad)
                 magnitude = math.sqrt(x_axis ** 2 + y_axis ** 2)
                 norm_mag = max(0.0, (magnitude - DEADZONE) / (1 - DEADZONE))
-                velocity = norm_mag * MAX_SPEED
+                velocity = norm_mag * max_speed
                 if y_axis < 0:
                     velocity = -velocity
                 send_command("move", velocity=velocity, angle=angle_deg)
