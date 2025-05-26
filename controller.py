@@ -193,6 +193,8 @@ def main():
             else:
                 angle_rad = math.atan2(x_axis, y_axis)
                 angle_deg = math.degrees(angle_rad)
+                if abs(angle_deg - 180) < 10:
+                    angle_deg = 180
                 magnitude = math.sqrt(x_axis ** 2 + y_axis ** 2)
                 norm_mag = max(0.0, (magnitude - DEADZONE) / (1 - DEADZONE))
                 velocity = norm_mag * max_speed
