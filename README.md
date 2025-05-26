@@ -18,7 +18,7 @@ This Python script lets you control a [Valetudo](https://github.com/Hypfer/Valet
 * 🚀 Toggle speed boost with the **Circle** button
 * 🏠 Return the robot to the dock with the **Triangle** button
 * 🎯 Smooth directional control with automatic speed scaling
-* 🛡️ Built-in clamping and retry handling to prevent API abuse/errors
+* 🛡️ Built-in clamping and retry handling to prevent API errors
 
 ---
 
