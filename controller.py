@@ -9,6 +9,8 @@ from urllib3.util.retry import Retry
 VALE_URL = "http://192.168.178.43"
 CONTROL_ENDPOINT = "/api/v2/robot/capabilities/HighResolutionManualControlCapability"
 FAN_ENDPOINT = "/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
+DOCK_ENDPOINT = "/api/v2/robot/capabilities/BasicControlCapability"
+
 DEADZONE = 0.15
 NORMAL_SPEED = 0.6
 BOOST_SPEED = 1.0
@@ -16,14 +18,16 @@ ANGLE_EPSILON = 3
 VELOCITY_EPSILON = 0.02
 SEND_INTERVAL = 0.1
 
-X_BUTTON_INDEX = 0      # PS4 "X" button = toggle fan
-BOOST_BUTTON_INDEX = 1  # PS4 "Circle" button = toggle boost
+X_BUTTON_INDEX = 0       # X = toggle fan
+CIRCLE_BUTTON_INDEX = 1  # Circle = toggle boost
+TRIANGLE_BUTTON_INDEX = 3  # Triangle = return to dock
 
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0.0
 fan_state = "off"
 boost_enabled = False
 boost_toggle_state = False
+dock_toggle_state = False
 
 session = requests.Session()
 retries = Retry(total=3, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
@@ -36,7 +40,7 @@ def send_command(action, velocity=0.0, angle=0.0):
 
     if action == "move":
         angle = round(angle, 1)
-        velocity = round(min(1.0, velocity), 3)  # Clamp max velocity
+        velocity = round(min(1.0, velocity), 3)
 
         angle_changed = last_sent["angle"] is None or abs(angle - last_sent["angle"]) > ANGLE_EPSILON
         velocity_changed = last_sent["velocity"] is None or abs(velocity - last_sent["velocity"]) > VELOCITY_EPSILON
@@ -83,8 +87,29 @@ def toggle_fan():
         print(f"[!] Fan request failed: {e}")
 
 
+def send_dock():
+    try:
+        # Disable manual control first
+        r1 = session.put(VALE_URL + CONTROL_ENDPOINT, json={"action": "disable"}, timeout=2)
+        if r1.status_code != 200:
+            print(f"[!] Failed to disable manual control: {r1.status_code} {r1.text}")
+            return
+
+        # Send dock command
+        r2 = session.put(VALE_URL + "/api/v2/robot/capabilities/BasicControlCapability",
+                         json={"action": "home"}, timeout=2)
+        if r2.status_code != 200:
+            print(f"[!] Dock HTTP {r2.status_code}: {r2.text}")
+        else:
+            print("[i] Return to dock command sent")
+
+    except Exception as e:
+        print(f"[!] Dock request failed: {e}")
+
+
+
 def main():
-    global boost_enabled, boost_toggle_state
+    global boost_enabled, boost_toggle_state, dock_toggle_state
 
     pygame.init()
     pygame.joystick.init()
@@ -106,34 +131,41 @@ def main():
         while True:
             pygame.event.pump()
 
-            # Debug: print any button press
+            # Print button presses
             for i in range(js.get_numbuttons()):
                 if js.get_button(i):
                     print(f"Button {i} pressed")
 
             x_axis = js.get_axis(0)
-            y_axis = -js.get_axis(1)  # Forward = positive
+            y_axis = -js.get_axis(1)
 
             x_button = js.get_button(X_BUTTON_INDEX)
-            boost_button = js.get_button(BOOST_BUTTON_INDEX)
+            circle_button = js.get_button(CIRCLE_BUTTON_INDEX)
+            triangle_button = js.get_button(TRIANGLE_BUTTON_INDEX)
 
-            # Fan toggle (X)
+            # Toggle fan (X)
             if x_button and not fan_button_state:
                 toggle_fan()
                 fan_button_state = True
             elif not x_button:
                 fan_button_state = False
 
-            # Boost toggle (Circle)
-            if boost_button and not boost_toggle_state:
+            # Toggle boost (Circle)
+            if circle_button and not boost_toggle_state:
                 boost_enabled = not boost_enabled
                 print(f"[i] Boost {'enabled' if boost_enabled else 'disabled'}")
                 boost_toggle_state = True
-            elif not boost_button:
+            elif not circle_button:
                 boost_toggle_state = False
 
-            max_speed = BOOST_SPEED if boost_enabled else NORMAL_SPEED
+            # Return to dock (Triangle)
+            if triangle_button and not dock_toggle_state:
+                send_dock()
+                dock_toggle_state = True
+            elif not triangle_button:
+                dock_toggle_state = False
 
+            max_speed = BOOST_SPEED if boost_enabled else NORMAL_SPEED
             abs_x = abs(x_axis)
             abs_y = abs(y_axis)
 
