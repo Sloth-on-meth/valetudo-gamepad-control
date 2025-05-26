@@ -28,6 +28,7 @@ This Python script lets you control a [Valetudo](https://github.com/Hypfer/Valet
 * **Circle (1)**: Toggle speed boost (0.6 ⇄ 1.0)
 * **Triangle (3)**: Stop remote control and send robot home
 * **Left joystick**: Controls direction and speed
+* **Square (2)**: Plays the test sound
 
 ---
 
