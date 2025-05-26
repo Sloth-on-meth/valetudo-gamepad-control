@@ -94,7 +94,7 @@ def send_dock():
         if r1.status_code != 200:
             print(f"[!] Failed to disable manual control: {r1.status_code} {r1.text}")
             return
-
+        time.sleep(2)
         # Send dock command
         r2 = session.put(VALE_URL + "/api/v2/robot/capabilities/BasicControlCapability",
                          json={"action": "home"}, timeout=2)
