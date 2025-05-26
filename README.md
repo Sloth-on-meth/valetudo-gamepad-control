@@ -18,7 +18,7 @@ This Python script allows you to control a Valetudo-compatible robot vacuum usin
 ## Controls (PS4 Controller)
 
 | Button       | Action                        |
-| ------------ | ----------------------------- |
+| ------------ | ----------------------this------- |
 | X (0)        | Toggle fan speed (max/off)    |
 | Circle (1)   | Toggle boost mode (0.6 / 1.0) |
 | Triangle (3) | Return to dock (disables RC)  |
@@ -52,13 +52,8 @@ Make sure the PS4 controller is connected **before running the script**.
 
 ## Robot API Configuration
 
-Make sure your robot is reachable at:
 
-```
-http://192.168.178.43
-```
-
-You can change this in the script by editing the `VALE_URL` variable.
+You can change the robot URL in the script by editing the `VALE_URL` variable.
 
 ---
 
@@ -81,15 +76,3 @@ You can change this in the script by editing the `VALE_URL` variable.
 
 ---
 
-## License
-
-MIT or WTFPL. You choose.
-
----
-
-## Troubleshooting
-
-* **Joystick not detected**: Ensure it's paired and connected before launching.
-* **HTTP 400 errors**: Likely due to exceeding `velocity > 1.0`. Script clamps this now.
-* **Fan errors**: Ensure your Valetudo firmware supports `FanSpeedControlCapability`.
-* **Dock command fails**: Make sure to disable remote control before sending "home".
