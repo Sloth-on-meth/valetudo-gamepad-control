@@ -94,9 +94,17 @@ def main():
         print("Exiting...")
 
     finally:
-        send_command("move", velocity=0.0, angle=0.0)
-        send_command("disable")
-        pygame.quit()
+        try:
+            print("Sending stop and ending remote control mode...")
+            send_command("move", velocity=0.0, angle=0.0)  # Ensure it doesn't keep moving
+            time.sleep(0.1)  # Small delay to flush last command
+            send_command("disable")  # Actually exits manual mode (app_rc_end)
+            print("Remote control mode exited.")
+        except Exception as e:
+            print(f"[!] Failed to exit cleanly: {e}")
+        finally:
+            pygame.quit()
+
 
 
 if __name__ == "__main__":
