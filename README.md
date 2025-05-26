@@ -1,22 +1,38 @@
 # Valetudo PS4 Controller Interface
 
+This Python script allows you to control a Valetudo-compatible robot vacuum using a PS4 joystick via `pygame`, using HTTP API calls.
 
-As i am banned from the Valetudo telegram, i am unable to chat with you guys there. makes me sad :(
+---
 
-This script allows you to control a Valetudo-powered vacuum (e.g. Roborock S5) using a PS4 controller via `pygame` and Valetudo's `HighResolutionManualControlCapability`.
+## Features
+
+* **Manual joystick control** (forward, reverse, arc, spin)
+* **Speed boost toggle** via Circle (O) button
+* **Fan speed toggle** via X button (max/off)
+* **Dock command** via Triangle button
+* **Button press logging**
+* **Velocity clamping** to prevent API errors
+
+---
+
+## Controls (PS4 Controller)
+
+| Button       | Action                        |
+| ------------ | ----------------------------- |
+| X (0)        | Toggle fan speed (max/off)    |
+| Circle (1)   | Toggle boost mode (0.6 / 1.0) |
+| Triangle (3) | Return to dock (disables RC)  |
+| Joystick     | Move/rotate robot             |
 
 ---
 
 ## Requirements
 
-* Python 3.x
+* Python 3.8+
 * `pygame`
 * `requests`
-* Valetudo with `HighResolutionManualControlCapability` enabled
 
----
-
-## Installation
+Install dependencies:
 
 ```bash
 pip install pygame requests
@@ -24,55 +40,56 @@ pip install pygame requests
 
 ---
 
-## Configuration
+## Usage
 
-Edit these values in the script if needed:
-
-```python
-VALE_URL = "http://192.168.178.43"  # Your vacuum's IP
-MAX_SPEED = 0.4                      # Max velocity in m/s
-DEADZONE = 0.15                      # Joystick deadzone
+```bash
+python3 controller.py
 ```
 
----
-
-## Controls
-
-* Left stick: Move the robot (directional angle + velocity)
-* Ctrl+C: Exit and disable remote control mode cleanly
+Make sure the PS4 controller is connected **before running the script**.
 
 ---
 
-## How it works
+## Robot API Configuration
 
-* Sends `{ "action": "enable" }` to start manual control
-* Converts left stick input into a polar vector (`velocity`, `angle`)
-* Sends only meaningful changes (smoothed + throttled)
-* On exit:
+Make sure your robot is reachable at:
 
-  * Sends stop (`velocity: 0.0`)
-  * Sends `{ "action": "disable" }` to exit manual mode
-
----
-
-## Example Output
-
-```text
-Using joystick: PS4 Controller
-Sending stop and ending remote control mode...
-Remote control mode exited.
 ```
+http://192.168.178.43
+```
+
+You can change this in the script by editing the `VALE_URL` variable.
+
+---
+
+## Endpoints Used
+
+| Capability        | Endpoint                                                                        |
+| ----------------- | ------------------------------------------------------------------------------- |
+| Movement          | `/api/v2/robot/capabilities/HighResolutionManualControlCapability`              |
+| Fan preset toggle | `/api/v2/robot/capabilities/FanSpeedControlCapability/preset`                   |
+| Docking           | `/api/v2/robot/capabilities/BasicControlCapability` (with `{"action": "home"}`) |
+
+---
+
+## Notes
+
+* All movement commands are rate-limited to avoid spamming the robot.
+* Movement direction and speed are proportional to joystick tilt.
+* `BOOST_SPEED` and `NORMAL_SPEED` are capped at 1.0.
+* Docking disables manual mode before issuing the "home" command.
+
+---
+
+## License
+
+MIT or WTFPL. You choose.
 
 ---
 
 ## Troubleshooting
 
-* If the robot doesn't move:
-
-  * Make sure `HighResolutionManualControlCapability` is listed at `/api/v2/robot/capabilities`
-  * Ensure manual mode is enabled with `{ "action": "enable" }`
-* Some Roborock firmware requires low velocities (< 0.4 m/s)
-
----
-
-
+* **Joystick not detected**: Ensure it's paired and connected before launching.
+* **HTTP 400 errors**: Likely due to exceeding `velocity > 1.0`. Script clamps this now.
+* **Fan errors**: Ensure your Valetudo firmware supports `FanSpeedControlCapability`.
+* **Dock command fails**: Make sure to disable remote control before sending "home".
