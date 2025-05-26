@@ -21,6 +21,8 @@ SEND_INTERVAL = 0.1
 X_BUTTON_INDEX = 0
 CIRCLE_BUTTON_INDEX = 1
 TRIANGLE_BUTTON_INDEX = 3
+SQUARE_BUTTON_INDEX = 2  # Square = play sound
+SPEAKER_ENDPOINT = "/api/v2/robot/capabilities/SpeakerTestCapability"
 
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0.0
@@ -70,6 +72,16 @@ def send_command(action, velocity=0.0, angle=0.0):
                 print(f"[!] HTTP {r.status_code}: {r.text}")
         except Exception as e:
             print(f"[!] Request failed: {e}")
+def play_sound():
+    try:
+        r = session.put(VALE_URL + SPEAKER_ENDPOINT, json={"action": "play_test_sound"}, timeout=2)
+        if r.status_code != 200:
+            print(f"[!] Sound HTTP {r.status_code}: {r.text}")
+        else:
+            print("[i] Played test sound")
+    except Exception as e:
+        print(f"[!] Sound request failed: {e}")
+
 
 
 def toggle_fan():
@@ -132,6 +144,7 @@ def main():
             x_button = js.get_button(X_BUTTON_INDEX)
             circle_button = js.get_button(CIRCLE_BUTTON_INDEX)
             triangle_button = js.get_button(TRIANGLE_BUTTON_INDEX)
+            square_button = js.get_button(SQUARE_BUTTON_INDEX)
 
             if x_button and not fan_button_state:
                 toggle_fan()
@@ -145,6 +158,9 @@ def main():
                 boost_toggle_state = True
             elif not circle_button:
                 boost_toggle_state = False
+            # Play sound (Square)
+            if square_button:
+                play_sound()
 
             if triangle_button and not dock_toggle_state:
                 dock_toggle_state = True
