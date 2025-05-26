@@ -1,38 +1,33 @@
 # Valetudo PS4 Controller Interface
 
-This Python script allows you to control a Valetudo-compatible robot vacuum using a PS4 joystick via `pygame`, using HTTP API calls.
+This Python script lets you control a Valetudo-compatible robot vacuum using a PS4 controller. The script sends HTTP API commands based on joystick input.
 
 ---
 
 ## Features
 
-* **Manual joystick control** (forward, reverse, arc, spin)
-* **Speed boost toggle** via Circle (O) button
-* **Fan speed toggle** via X button (max/off)
-* **Dock command** via Triangle button
-* **Button press logging**
-* **Velocity clamping** to prevent API errors
+* Move/rotate the robot using the joystick
+* Toggle fan speed with the **X** button
+* Toggle speed boost with the **Circle** button
+* Return the robot to the dock with the **Triangle** button
+* Smooth directional control with automatic speed scaling
+* Built-in clamping and retry handling to prevent API abuse/errors
 
 ---
 
-## Controls (PS4 Controller)
+## Controls
 
-| Button       | Action                        |
-| ------------ | ----------------------this------- |
-| X (0)        | Toggle fan speed (max/off)    |
-| Circle (1)   | Toggle boost mode (0.6 / 1.0) |
-| Triangle (3) | Return to dock (disables RC)  |
-| Joystick     | Move/rotate robot             |
+* **X (0)**: Toggle fan speed between max and off
+* **Circle (1)**: Toggle speed boost (0.6 ⇄ 1.0)
+* **Triangle (3)**: Stop remote control and send robot home
+* **Left joystick**: Controls direction and speed
 
 ---
 
-## Requirements
+## Setup Requirements
 
-* Python 3.8+
-* `pygame`
-* `requests`
-
-Install dependencies:
+* Python 3.8 or newer
+* Dependencies:
 
 ```bash
 pip install pygame requests
@@ -42,41 +37,33 @@ pip install pygame requests
 
 ## Usage
 
+1. Make sure your PS4 controller is connected.
+2. Open `controller.py` in your editor.
+3. Edit the following line to point to your Valetudo robot:
+
+```python
+VALE_URL = "http://192.168.178.43"
+```
+
+4. Run the script:
+
 ```bash
 python3 controller.py
 ```
 
-Make sure the PS4 controller is connected **before running the script**.
-
 ---
 
-## Robot API Configuration
+## API Endpoints Used
 
-
-You can change the robot URL in the script by editing the `VALE_URL` variable.
-
----
-
-## Endpoints Used
-
-| Button       | Action                          |
-|--------------|----------------------------------|
-| X (0)        | Toggle fan speed (max/off)       |
-| Circle (1)   | Toggle boost mode (0.6 / 1.0)    |
-| Triangle (3) | Return to dock (disables RC)     |
-| Joystick     | Move/rotate robot                |
-``` Toggle boost mode (0.6 / 1.0)     |
-| Triangle (3)  | Return to dock (disables RC)      |
-| Joystick      | Move/rotate robot                 |
+* `HighResolutionManualControlCapability` for directional control
+* `FanSpeedControlCapability/preset` to toggle fan speed
+* `BasicControlCapability` with `{ "action": "home" }` to send robot to the dock
 
 ---
 
 ## Notes
 
-* All movement commands are rate-limited to avoid spamming the robot.
-* Movement direction and speed are proportional to joystick tilt.
-* `BOOST_SPEED` and `NORMAL_SPEED` are capped at 1.0.
-* Docking disables manual mode before issuing the "home" command.
-
----
-
+* Remote control is automatically disabled before sending the robot home.
+* Speed is dynamically scaled based on joystick tilt.
+* Movement commands are rate-limited to prevent flooding.
+* Velocity is clamped to avoid exceeding robot limits.
