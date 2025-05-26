@@ -1,7 +1,7 @@
 # Valetudo PS4 Controller Interface
 
 
-#As i am banned from the Valetudo telegram, i am unable to chat with you guys there. makes me sad :(
+As i am banned from the Valetudo telegram, i am unable to chat with you guys there. makes me sad :(
 
 This script allows you to control a Valetudo-powered vacuum (e.g. Roborock S5) using a PS4 controller via `pygame` and Valetudo's `HighResolutionManualControlCapability`.
 
