@@ -59,11 +59,15 @@ You can change the robot URL in the script by editing the `VALE_URL` variable.
 
 ## Endpoints Used
 
-| Capability        | Endpoint                                                                        |
-| ----------------- | ------------------------------------------------------------------------------- |
-| Movement          | `/api/v2/robot/capabilities/HighResolutionManualControlCapability`              |
-| Fan preset toggle | `/api/v2/robot/capabilities/FanSpeedControlCapability/preset`                   |
-| Docking           | `/api/v2/robot/capabilities/BasicControlCapability` (with `{"action": "home"}`) |
+| Button       | Action                          |
+|--------------|----------------------------------|
+| X (0)        | Toggle fan speed (max/off)       |
+| Circle (1)   | Toggle boost mode (0.6 / 1.0)    |
+| Triangle (3) | Return to dock (disables RC)     |
+| Joystick     | Move/rotate robot                |
+``` Toggle boost mode (0.6 / 1.0)     |
+| Triangle (3)  | Return to dock (disables RC)      |
+| Joystick      | Move/rotate robot                 |
 
 ---
 
