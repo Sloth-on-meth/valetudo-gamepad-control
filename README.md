@@ -1,18 +1,13 @@
 # 🕹️ Valetudo PS4 Controller Interface
 
-<p align="center">
-  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/license-MIT%20%7C%20WTFPL-brightgreen" alt="License">
-  <img src="https://img.shields.io/badge/valetudo-compatible-orange" alt="Valetudo Compatible">
-  <img src="https://img.shields.io/badge/controller-PS4-purple" alt="PS4 Controller">
-  <img src="https://img.shields.io/github/last-commit/yourusername/valetudo-ps4-controller?color=yellow" alt="Last Commit">
-  <img src="https://img.shields.io/github/stars/yourusername/valetudo-ps4-controller?style=social" alt="Stars">
-  <img src="https://img.shields.io/github/issues/yourusername/valetudo-ps4-controller" alt="Issues">
-</p>
 
-![License](https://img.shields.io/badge/license-MIT%20%7C%20WTFPL-brightgreen)
-![Valetudo](https://img.shields.io/badge/valetudo-compatible-orange)
-![Controller](https://img.shields.io/badge/controller-PS4-purple)
+
+  <img src="https://img.shields.io/github/last-commit/sloth-on-meth/valetudo-ps4-controller?color=yellow" alt="Last Commit">
+  <img src="https://img.shields.io/github/stars/sloth-on-meth/valetudo-ps4-controller?style=social" alt="Stars">
+  <img src="https://img.shields.io/github/issues/sloth-on-meth/valetudo-ps4-controller" alt="Issues">
+
+
+
 
 This Python script lets you control a Valetudo-compatible robot vacuum using a PS4 controller. The script sends HTTP API commands based on joystick input.
 
