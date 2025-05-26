@@ -7,7 +7,7 @@
 
 
 
-This Python script lets you control a Valetudo-compatible robot vacuum using a PS4 controller. The script sends HTTP API commands based on joystick input.
+This Python script lets you control a [Valetudo]('https://github.com/Hypfer/Valetudo')-compatible robot vacuum using a PS4 controller. The script sends HTTP API commands based on joystick input.
 
 ---
 
