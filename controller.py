@@ -10,18 +10,17 @@ VALE_URL = "http://192.168.178.43"
 CONTROL_ENDPOINT = "/api/v2/robot/capabilities/HighResolutionManualControlCapability"
 FAN_ENDPOINT = "/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
 DEADZONE = 0.15
-MAX_SPEED = 0.4
+MAX_SPEED = 0.6
 ANGLE_EPSILON = 3
 VELOCITY_EPSILON = 0.02
 SEND_INTERVAL = 0.1
 
-X_BUTTON_INDEX = 0  # X button on PS4 controller
+X_BUTTON_INDEX = 0  # PS4 "X" button
 
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0.0
 fan_state = "off"
 
-# Setup requests session with retries
 session = requests.Session()
 retries = Retry(total=3, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
 session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -102,7 +101,7 @@ def main():
             pygame.event.pump()
 
             x_axis = js.get_axis(0)
-            y_axis = -js.get_axis(1)  # Forward is positive
+            y_axis = -js.get_axis(1)
 
             x_button = js.get_button(X_BUTTON_INDEX)
             if x_button and not fan_button_state:
@@ -111,13 +110,35 @@ def main():
             elif not x_button:
                 fan_button_state = False
 
-            if abs(x_axis) < DEADZONE and abs(y_axis) < DEADZONE:
+            abs_x = abs(x_axis)
+            abs_y = abs(y_axis)
+
+            if abs_x < DEADZONE and abs_y < DEADZONE:
                 send_command("move", velocity=0.0, angle=0.0)
+
+            elif abs_y > DEADZONE and abs_x < DEADZONE:
+                # Straight forward or backward
+                angle_deg = 0 if y_axis > 0 else 180
+                norm_mag = (abs(y_axis) - DEADZONE) / (1 - DEADZONE)
+                velocity = norm_mag * MAX_SPEED
+                if y_axis < 0:
+                    velocity = -velocity
+                send_command("move", velocity=velocity, angle=angle_deg)
+
+            elif abs_x > DEADZONE and abs_y < DEADZONE:
+                # Spin in place
+                angle_deg = 90 if x_axis > 0 else -90
+                send_command("move", velocity=0.0, angle=angle_deg)
+
             else:
+                # Arc/curve
                 angle_rad = math.atan2(x_axis, y_axis)
                 angle_deg = math.degrees(angle_rad)
                 magnitude = math.sqrt(x_axis ** 2 + y_axis ** 2)
-                velocity = min(MAX_SPEED, max(0.0, (magnitude - DEADZONE) / (1 - DEADZONE)) * MAX_SPEED)
+                norm_mag = max(0.0, (magnitude - DEADZONE) / (1 - DEADZONE))
+                velocity = norm_mag * MAX_SPEED
+                if y_axis < 0:
+                    velocity = -velocity
                 send_command("move", velocity=velocity, angle=angle_deg)
 
             clock.tick(60)
