@@ -20,14 +20,14 @@ Control your Valetudo-powered robot vacuum with a game controller — now with r
 ## 🧪 Requirements
 
 * Python 3.8+
-* Valetudo (with HighResolutionManualControlCapability enabled)
+* a robot vacuum running Valetudo > 2025.05.0 (with HighResolutionManualControlCapability)
 * A joystick/gamepad supported by [pygame](https://www.pygame.org/)
 * `aiohttp`, `pygame`:
 
 ```bash
 pip install -r requirements.txt
 # or individually
-pip3 install aiohttp pygame
+pip install aiohttp pygame
 ```
 
 ---
@@ -46,7 +46,7 @@ pip3 install aiohttp pygame
 
 ## 🛠️ Usage
 
-1. Plug in your gamepad
+1. connect your gamepad
 2. Edit `VALE_URL` in `controller.py` if needed
 3. Run:
 
@@ -56,8 +56,6 @@ python controller.py
 
 4. Move the robot with the stick. Use buttons as described above.
 
+---
 
-
-## ❓ Contributing
-
-PRs welcome! Fork, branch, make it better, send it back.
+##
