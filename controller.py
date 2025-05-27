@@ -26,10 +26,8 @@ y_axis = 0.0
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0
 
-
 def clamp(val, min_val, max_val):
     return max(min_val, min(val, max_val))
-
 
 async def get_robot_battery(session):
     try:
@@ -40,15 +38,6 @@ async def get_robot_battery(session):
                     return attr.get("level", "?")
     except:
         return "?"
-
-
-#def get_controller_battery():
-#    try:
-#        output = subprocess.check_output(["cat", "/sys/class/power_supply/sony_controller_battery_00:1f:20:xx:xx:xx/capacity"])
-#        return output.decode().strip()
-#    except:
-#        return "?"
-
 
 async def send_command(session, velocity, angle):
     global last_sent, last_send_time
@@ -72,13 +61,11 @@ async def send_command(session, velocity, angle):
         except Exception as e:
             print(f"[!] Failed to send command: {e}")
 
-
 async def play_sound(session):
     try:
         await session.put(SOUND_URL, json={"action": "play_test_sound"})
     except Exception as e:
         print(f"[!] Failed to play sound: {e}")
-
 
 async def send_dock(session):
     try:
@@ -86,14 +73,11 @@ async def send_dock(session):
     except Exception as e:
         print(f"[!] Failed to dock: {e}")
 
-
 async def poll_robot_battery(session):
-    global robot_battery, controller_battery
+    global robot_battery
     while True:
         robot_battery = await get_robot_battery(session)
-        #controller_battery = get_controller_battery()
         await asyncio.sleep(5)
-
 
 async def read_joystick_input(session):
     global x_axis, y_axis, speed_index
@@ -147,33 +131,34 @@ async def read_joystick_input(session):
 
         await asyncio.sleep(0.01)
 
-
-async def draw_tui(stdscr):
-    global robot_battery, speed_index, x_axis, y_axis
-    curses.curs_set(0)
-    stdscr.nodelay(True)
+async def draw_tui_labels(stdscr):
+    global robot_battery, speed_index
     while True:
-        stdscr.erase()
         stdscr.addstr(0, 0, "Valetudo TUI")
-        stdscr.addstr(2, 0, f"Robot battery:     {robot_battery}%")
-        stdscr.addstr(3, 0, f"Speed level:       {SPEED_LEVELS[speed_index]}")
+        stdscr.addstr(2, 0, f"Robot battery:     {robot_battery}%   ")
+        stdscr.addstr(3, 0, f"Speed level:       {SPEED_LEVELS[speed_index]}    ")
         stdscr.addstr(6, 0, "Circle: Cycle speed")
         stdscr.addstr(7, 0, "Square: Play sound")
         stdscr.addstr(8, 0, "Triangle: Dock robot")
-        stdscr.addstr(10, 0, "Joystick X: [{:<20}] {:.2f}".format("=" * int((x_axis + 1) * 10), x_axis))
-        stdscr.addstr(11, 0, "Joystick Y: [{:<20}] {:.2f}".format("=" * int((y_axis + 1) * 10), y_axis))
         stdscr.refresh()
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(1.0)
 
+async def draw_tui_joystick(stdscr):
+    global x_axis, y_axis
+    while True:
+        stdscr.addstr(10, 0, "Joystick X: [{:<20}] {:.2f} ".format("=" * int((x_axis + 1) * 10), x_axis))
+        stdscr.addstr(11, 0, "Joystick Y: [{:<20}] {:.2f} ".format("=" * int((y_axis + 1) * 10), y_axis))
+        stdscr.refresh()
+        await asyncio.sleep(0.1)
 
 async def main(stdscr):
     async with aiohttp.ClientSession() as session:
         await asyncio.gather(
-            draw_tui(stdscr),
+            draw_tui_labels(stdscr),
+            draw_tui_joystick(stdscr),
             poll_robot_battery(session),
             read_joystick_input(session)
         )
-
 
 if __name__ == "__main__":
     curses.wrapper(lambda stdscr: asyncio.run(main(stdscr)))
