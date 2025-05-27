@@ -58,7 +58,6 @@ async def send_command(session, action, velocity=0.0, angle=0.0):
     if action == "move":
         angle = round(angle, 1)
         velocity = round(clamp(velocity, -1.0, 1.0), 3)
-
         angle_changed = last_sent["angle"] is None or abs(angle - last_sent["angle"]) > ANGLE_EPSILON
         velocity_changed = last_sent["velocity"] is None or abs(velocity - last_sent["velocity"]) > VELOCITY_EPSILON
         if angle_changed or velocity_changed or (now - last_send_time) > SEND_INTERVAL_MS:
@@ -105,18 +104,25 @@ async def handle_movement(session, x_axis, y_axis, boost):
     if abs_x < DEADZONE and abs_y < DEADZONE:
         await send_command(session, "move", 0.0, 0.0)
     elif abs_y > DEADZONE and abs_x < (DEADZONE * 1.5):
-        angle = 0 if y_axis > 0 else 180
+        # Straight forward or backward
         velocity = ((abs_y - DEADZONE) / (1 - DEADZONE)) * max_speed
-        await send_command(session, "move", clamp(velocity if y_axis > 0 else -velocity, -1.0, 1.0), angle)
+        velocity = velocity if y_axis > 0 else -velocity
+        await send_command(session, "move", clamp(velocity, -1.0, 1.0), 0.0)
     elif abs_x > DEADZONE and abs_y < (DEADZONE * 1.5):
+        # Rotation only
         angle = 90 if x_axis > 0 else -90
         await send_command(session, "move", 0.0, angle)
     else:
-        angle_rad = math.atan2(x_axis, y_axis)
+        # Diagonal movement
+        # Flip x-axis when going backwards to fix mirrored controls
+        corrected_x = -x_axis if y_axis < 0 else x_axis
+        angle_rad = math.atan2(corrected_x, y_axis)
         angle_deg = math.degrees(angle_rad)
         magnitude = math.sqrt(x_axis ** 2 + y_axis ** 2)
         velocity = ((max(0.0, magnitude - DEADZONE)) / (1 - DEADZONE)) * max_speed
-        await send_command(session, "move", clamp(velocity if y_axis > 0 else -velocity, -1.0, 1.0), angle_deg)
+        velocity = velocity if y_axis > 0 else -velocity
+        await send_command(session, "move", clamp(velocity, -1.0, 1.0), angle_deg)
+
 
 
 async def main():
