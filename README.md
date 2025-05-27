@@ -34,6 +34,12 @@ pip install aiohttp pygame
 ```
 
 ---
+## Known issues
+
+ - it is currently not possible to go straight backwards using this script, have not been able to figure it out.
+   i wanted to ask hypfer about this, but i am banned from the telegram chat and github for some odd reason.
+ 
+---
 
 ## 🎮 Controls
 
