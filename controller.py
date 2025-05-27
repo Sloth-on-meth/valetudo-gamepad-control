@@ -4,6 +4,7 @@ import curses
 import pygame
 import math
 import sys
+import subprocess
 
 VALE_URL = "http://192.168.178.43"
 STATE_URL = f"{VALE_URL}/api/v2/robot/state/"
@@ -20,6 +21,8 @@ SEND_INTERVAL_MS = 100
 speed_index = 1
 robot_battery = "?"
 controller_battery = "?"
+x_axis = 0.0
+y_axis = 0.0
 last_sent = {"angle": None, "velocity": None}
 last_send_time = 0
 
@@ -37,6 +40,14 @@ async def get_robot_battery(session):
                     return attr.get("level", "?")
     except:
         return "?"
+
+
+#def get_controller_battery():
+#    try:
+#        output = subprocess.check_output(["cat", "/sys/class/power_supply/sony_controller_battery_00:1f:20:xx:xx:xx/capacity"])
+#        return output.decode().strip()
+#    except:
+#        return "?"
 
 
 async def send_command(session, velocity, angle):
@@ -77,14 +88,15 @@ async def send_dock(session):
 
 
 async def poll_robot_battery(session):
-    global robot_battery
+    global robot_battery, controller_battery
     while True:
         robot_battery = await get_robot_battery(session)
+        #controller_battery = get_controller_battery()
         await asyncio.sleep(5)
 
 
 async def read_joystick_input(session):
-    global controller_battery, speed_index
+    global x_axis, y_axis, speed_index
     pygame.init()
     pygame.joystick.init()
 
@@ -99,8 +111,6 @@ async def read_joystick_input(session):
         pygame.event.pump()
         x_axis = js.get_axis(0)
         y_axis = -js.get_axis(1)
-
-        controller_battery = "?"
 
         if js.get_button(1):  # CIRCLE
             speed_index = (speed_index + 1) % len(SPEED_LEVELS)
@@ -139,18 +149,19 @@ async def read_joystick_input(session):
 
 
 async def draw_tui(stdscr):
-    global robot_battery, controller_battery, speed_index
+    global robot_battery, speed_index, x_axis, y_axis
     curses.curs_set(0)
     stdscr.nodelay(True)
     while True:
         stdscr.erase()
         stdscr.addstr(0, 0, "Valetudo TUI")
         stdscr.addstr(2, 0, f"Robot battery:     {robot_battery}%")
-        stdscr.addstr(3, 0, f"Controller battery:{controller_battery}%")
-        stdscr.addstr(4, 0, f"Speed level:       {SPEED_LEVELS[speed_index]}")
+        stdscr.addstr(3, 0, f"Speed level:       {SPEED_LEVELS[speed_index]}")
         stdscr.addstr(6, 0, "Circle: Cycle speed")
         stdscr.addstr(7, 0, "Square: Play sound")
         stdscr.addstr(8, 0, "Triangle: Dock robot")
+        stdscr.addstr(10, 0, "Joystick X: [{:<20}] {:.2f}".format("=" * int((x_axis + 1) * 10), x_axis))
+        stdscr.addstr(11, 0, "Joystick Y: [{:<20}] {:.2f}".format("=" * int((y_axis + 1) * 10), y_axis))
         stdscr.refresh()
         await asyncio.sleep(0.2)
 
