@@ -11,6 +11,7 @@ STATE_URL = f"{VALE_URL}/api/v2/robot/state/"
 CONTROL_URL = f"{VALE_URL}/api/v2/robot/capabilities/HighResolutionManualControlCapability"
 SOUND_URL = f"{VALE_URL}/api/v2/robot/capabilities/SpeakerTestCapability"
 DOCK_URL = f"{VALE_URL}/api/v2/robot/capabilities/BasicControlCapability"
+FAN_URL = f"{VALE_URL}/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
 
 SPEED_LEVELS = [0.1, 0.6, 1.0]
 DEADZONE = 0.15
@@ -19,6 +20,7 @@ VELOCITY_EPSILON = 0.02
 SEND_INTERVAL_MS = 100
 
 speed_index = 1
+fan_state = "off"
 robot_battery = "?"
 controller_battery = "?"
 x_axis = 0.0
@@ -72,6 +74,24 @@ async def send_dock(session):
         await session.put(DOCK_URL, json={"action": "home"})
     except Exception as e:
         print(f"[!] Failed to dock: {e}")
+FAN_STATES = ["off", "max"]
+fan_state_index = 0
+
+async def toggle_fan(session):
+    global fan_state, fan_state_index
+    fan_state_index = (fan_state_index + 1) % len(FAN_STATES)
+    fan_state = FAN_STATES[fan_state_index]
+    try:
+        async with session.put(FAN_URL, json={"name": fan_state}, timeout=2) as resp:
+            if resp.status != 200:
+                text = await resp.text()
+                print(f"[!] Fan HTTP {resp.status}: {text}")
+            else:
+                print(f"[i] Fan set to {fan_state}")
+    except Exception as e:
+        print(f"[!] Failed to set fan: {e}")
+
+
 
 async def poll_robot_battery(session):
     global robot_battery
@@ -95,6 +115,10 @@ async def read_joystick_input(session):
         pygame.event.pump()
         x_axis = js.get_axis(0)
         y_axis = -js.get_axis(1)
+
+        if js.get_button(0):  # X
+            await toggle_fan(session)
+            await asyncio.sleep(0.3)
 
         if js.get_button(1):  # CIRCLE
             speed_index = (speed_index + 1) % len(SPEED_LEVELS)
@@ -132,22 +156,24 @@ async def read_joystick_input(session):
         await asyncio.sleep(0.01)
 
 async def draw_tui_labels(stdscr):
-    global robot_battery, speed_index
+    global robot_battery, speed_index, fan_state
     while True:
         stdscr.addstr(0, 0, "Valetudo TUI")
         stdscr.addstr(2, 0, f"Robot battery:     {robot_battery}%   ")
         stdscr.addstr(3, 0, f"Speed level:       {SPEED_LEVELS[speed_index]}    ")
-        stdscr.addstr(6, 0, "Circle: Cycle speed")
-        stdscr.addstr(7, 0, "Square: Play sound")
-        stdscr.addstr(8, 0, "Triangle: Dock robot")
+        stdscr.addstr(4, 0, f"Fan mode:          {fan_state}       ")
+        stdscr.addstr(6, 0, "X: Toggle fan mode")
+        stdscr.addstr(7, 0, "Circle: Cycle speed")
+        stdscr.addstr(8, 0, "Square: Play sound")
+        stdscr.addstr(9, 0, "Triangle: Dock robot")
         stdscr.refresh()
         await asyncio.sleep(1.0)
 
 async def draw_tui_joystick(stdscr):
     global x_axis, y_axis
     while True:
-        stdscr.addstr(10, 0, "Joystick X: [{:<20}] {:.2f} ".format("=" * int((x_axis + 1) * 10), x_axis))
-        stdscr.addstr(11, 0, "Joystick Y: [{:<20}] {:.2f} ".format("=" * int((y_axis + 1) * 10), y_axis))
+        stdscr.addstr(11, 0, "Joystick X: [{:<20}] {:.2f} ".format("=" * int((x_axis + 1) * 10), x_axis))
+        stdscr.addstr(12, 0, "Joystick Y: [{:<20}] {:.2f} ".format("=" * int((y_axis + 1) * 10), y_axis))
         stdscr.refresh()
         await asyncio.sleep(0.1)
 
