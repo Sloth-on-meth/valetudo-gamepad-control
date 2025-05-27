@@ -1,3 +1,6 @@
+[![GitHub stars](https://img.shields.io/github/stars/Sloth-on-meth/valetudo-gamepad-control?style=social)](https://github.com/Sloth-on-meth/valetudo-gamepad-control/stargazers)
+[![Commits](https://img.shields.io/github/commit-activity/m/Sloth-on-meth/valetudo-gamepad-control)](https://github.com/Sloth-on-meth/valetudo-gamepad-control/commits/master)
+
 # Valetudo Gamepad Control
 
 Control your Valetudo-powered robot vacuum with a game controller — now with real-time joystick input, async network commands, and optional boost/fan/sound controls.
