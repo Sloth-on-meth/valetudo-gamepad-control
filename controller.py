@@ -49,11 +49,12 @@ async def joystick_loop(api: RobotAPI, joystick: JoystickController, state, exit
         if joystick.button_pressed(1):  # CIRCLE
             state['speed_index'] = joystick.cycle_speed()
             await asyncio.sleep(0.3)
-        if joystick.button_pressed(2):  # SQUARE
+        if joystick.button_pressed(3):  # SQUARE (physically)
             await api.play_sound()
             await asyncio.sleep(0.3)
-        if joystick.button_pressed(3):  # TRIANGLE
+        if joystick.button_pressed(2):  # TRIANGLE (physically)
             await api.dock()
+            exit_event.set()
             await asyncio.sleep(0.3)
         if joystick.button_pressed(9):  # OPTIONS (Exit)
             exit_event.set()
