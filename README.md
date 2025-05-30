@@ -43,6 +43,7 @@ pip install aiohttp pygame
 | Circle     | Cycle speed level   |
 | Square     | Play test sound     |
 | Triangle   | Dock robot and exit |
+| X          | Toggle Vaccuum       |
 
 ---
 
