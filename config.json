@@ -1,0 +1,9 @@
+{
+  "valetudo_url": "http://192.168.178.43",
+  "speed_levels": [0.1, 0.6, 1.0],
+  "fan_states": ["off", "max"],
+  "deadzone": 0.15,
+  "angle_epsilon": 3,
+  "velocity_epsilon": 0.02,
+  "send_interval_ms": 100
+}

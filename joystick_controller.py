@@ -3,19 +3,14 @@ import logging
 import pygame
 import os
 # Configuration
-VALETUDO_URL = os.getenv("VALETUDO_URL", "http://192.168.178.43")
-STATE_URL = f"{VALETUDO_URL}/api/v2/robot/state/"
-CONTROL_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/HighResolutionManualControlCapability"
-SOUND_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/SpeakerTestCapability"
-DOCK_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/BasicControlCapability"
-FAN_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
+import json
+import os
 
-SPEED_LEVELS = [0.1, 0.6, 1.0]
-FAN_STATES = ["off", "max"]
-DEADZONE = 0.15
-ANGLE_EPSILON = 3
-VELOCITY_EPSILON = 0.02
-SEND_INTERVAL_MS = 100
+with open(os.path.join(os.path.dirname(__file__), 'config.json')) as f:
+    config = json.load(f)
+VALETUDO_URL = config["valetudo_url"]
+SPEED_LEVELS = config["speed_levels"]
+DEADZONE = config["deadzone"]
 
 class JoystickController:
     """Handles joystick input and state."""
@@ -42,9 +37,9 @@ class JoystickController:
         return self.js.get_button(idx)
 
     def cycle_speed(self):
-        self.speed_index = (self.speed_index + 1) % len(SPEED_LEVELS)
+        self.speed_index = (self.speed_index + 1) % len(speed_levels)
         return self.speed_index
 
     def cycle_fan(self):
-        self.fan_index = (self.fan_index + 1) % len(FAN_STATES)
-        return FAN_STATES[self.fan_index]
+        self.fan_index = (self.fan_index + 1) % len(fan_states)
+        return fan_states[self.fan_index]

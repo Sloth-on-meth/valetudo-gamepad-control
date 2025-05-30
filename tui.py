@@ -4,19 +4,15 @@ import logging
 import os 
 import pygame
 # Configuration
-VALETUDO_URL = os.getenv("VALETUDO_URL", "http://192.168.178.43")
-STATE_URL = f"{VALETUDO_URL}/api/v2/robot/state/"
-CONTROL_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/HighResolutionManualControlCapability"
-SOUND_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/SpeakerTestCapability"
-DOCK_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/BasicControlCapability"
-FAN_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
+import json
+import os
 
-SPEED_LEVELS = [0.1, 0.6, 1.0]
-FAN_STATES = ["off", "max"]
-DEADZONE = 0.15
-ANGLE_EPSILON = 3
-VELOCITY_EPSILON = 0.02
-SEND_INTERVAL_MS = 100
+with open(os.path.join(os.path.dirname(__file__), 'config.json')) as f:
+    config = json.load(f)
+VALETUDO_URL = config["valetudo_url"]
+SPEED_LEVELS = config["speed_levels"]
+DEADZONE = config["deadzone"]
+    
 class ValetudoTUI:
     """Handles the curses-based TUI."""
 
