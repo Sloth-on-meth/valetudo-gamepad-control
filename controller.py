@@ -18,11 +18,7 @@ with open(os.path.join(os.path.dirname(__file__), 'config.json')) as f:
 VALETUDO_URL = config["valetudo_url"]
 SPEED_LEVELS = config["speed_levels"]
 DEADZONE = config["deadzone"]
-STATE_URL = f"{VALETUDO_URL}/api/v2/robot/state/"
-CONTROL_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/HighResolutionManualControlCapability"
-SOUND_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/SpeakerTestCapability"
-DOCK_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/BasicControlCapability"
-FAN_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
+
 
 logging.basicConfig(level=logging.INFO)
 
