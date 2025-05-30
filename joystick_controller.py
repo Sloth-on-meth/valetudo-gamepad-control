@@ -6,11 +6,11 @@ import os
 import json
 import os
 
-with open(os.path.join(os.path.dirname(__file__), 'config.json')) as f:
-    config = json.load(f)
-VALETUDO_URL = config["valetudo_url"]
-SPEED_LEVELS = config["speed_levels"]
-DEADZONE = config["deadzone"]
+from config import (
+    VALETUDO_URL, SPEED_LEVELS, DEADZONE,
+    ANGLE_EPSILON, VELOCITY_EPSILON, SEND_INTERVAL_MS
+)
+
 
 class JoystickController:
     """Handles joystick input and state."""

@@ -7,19 +7,17 @@ import os
 import json
 import os
 
-with open(os.path.join(os.path.dirname(__file__), 'config.json')) as f:
-    config = json.load(f)
-VALETUDO_URL = config["valetudo_url"]
-SPEED_LEVELS = config["speed_levels"]
-DEADZONE = config["deadzone"]
-ANGLE_EPSILON = config["angle_epsilon"]
-VELOCITY_EPSILON = config["velocity_epsilon"]
+from config import (
+    VALETUDO_URL, SPEED_LEVELS, DEADZONE,
+    ANGLE_EPSILON, VELOCITY_EPSILON, SEND_INTERVAL_MS
+)
+
 STATE_URL = f"{VALETUDO_URL}/api/v2/robot/state/"
 CONTROL_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/HighResolutionManualControlCapability"
 SOUND_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/SpeakerTestCapability"
 DOCK_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/BasicControlCapability"
 FAN_URL = f"{VALETUDO_URL}/api/v2/robot/capabilities/FanSpeedControlCapability/preset"
-SEND_INTERVAL_MS = config["send_interval_ms"]
+
 
 def clamp(val: float, min_val: float, max_val: float) -> float:
     return max(min_val, min(val, max_val))
