@@ -12,3 +12,4 @@ DEADZONE = config["deadzone"]
 ANGLE_EPSILON = config.get("angle_epsilon", 1.0)
 VELOCITY_EPSILON = config.get("velocity_epsilon", 0.01)
 SEND_INTERVAL_MS = config.get("send_interval_ms", 100)
+FAN_STATES = config.get("fan_states", ["off", "low", "medium", "high"])

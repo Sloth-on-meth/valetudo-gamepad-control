@@ -8,8 +8,7 @@ import os
 
 from config import (
     VALETUDO_URL, SPEED_LEVELS, DEADZONE,
-    ANGLE_EPSILON, VELOCITY_EPSILON, SEND_INTERVAL_MS
-)
+    ANGLE_EPSILON, VELOCITY_EPSILON, SEND_INTERVAL_MS, FAN_STATES)
 
 
 class JoystickController:
@@ -37,9 +36,9 @@ class JoystickController:
         return self.js.get_button(idx)
 
     def cycle_speed(self):
-        self.speed_index = (self.speed_index + 1) % len(speed_levels)
+        self.speed_index = (self.speed_index + 1) % len(SPEED_LEVELS)
         return self.speed_index
 
     def cycle_fan(self):
-        self.fan_index = (self.fan_index + 1) % len(fan_states)
-        return fan_states[self.fan_index]
+        self.fan_index = (self.fan_index + 1) % len(FAN_STATES)
+        return FAN_STATES[self.fan_index]
