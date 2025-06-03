@@ -4,32 +4,22 @@ import aiohttp
 import curses
 import pygame
 import math
+import json
 import logging
 from typing import Optional
 from robot_api import RobotAPI
 from joystick_controller import JoystickController
 from tui import ValetudoTUI
-
-import json
-import os
-
 from config import (
     VALETUDO_URL, SPEED_LEVELS, DEADZONE,
     ANGLE_EPSILON, VELOCITY_EPSILON, SEND_INTERVAL_MS
 )
 
 
-
-
 logging.basicConfig(level=logging.INFO)
 
 def clamp(val: float, min_val: float, max_val: float) -> float:
     return max(min_val, min(val, max_val))
-
-
-
-
-
 
 
 async def poll_robot_battery(api: RobotAPI, update_callback):
